@@ -15,6 +15,7 @@ import {
 } from "@/providers/trafikverket-rail-data-provider";
 
 const HOUR_MS = 3_600_000;
+const DATABASE_WRITE_BATCH_SIZE = 4;
 
 export interface CollectorStation {
   databaseId: string;
@@ -191,7 +192,7 @@ export function materializeTrainJourneys(
 async function inBatches<T>(
   values: T[],
   operation: (value: T) => Promise<unknown>,
-  batchSize = 25,
+  batchSize = DATABASE_WRITE_BATCH_SIZE,
 ): Promise<void> {
   for (let index = 0; index < values.length; index += batchSize) {
     await Promise.all(values.slice(index, index + batchSize).map(operation));

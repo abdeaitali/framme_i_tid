@@ -1,6 +1,10 @@
-import { describe, expect, it } from "vitest";
+import type { PrismaClient } from "@prisma/client";
+import { describe, expect, it, vi } from "vitest";
+import { PILOT_STATIONS } from "@/config/pilot";
 import type { TrainAnnouncement } from "@/providers/trafikverket-rail-data-provider";
+import type { TrafikverketRailDataProvider } from "@/providers/trafikverket-rail-data-provider";
 import {
+  collectTrafikverketWindow,
   materializeTrainJourneys,
   type CollectorStation,
 } from "./trafikverket-collector-service";
@@ -136,5 +140,41 @@ describe("materializeTrainJourneys", () => {
       actualArrival: null,
       finalized: true,
     });
+  });
+});
+
+describe("collectTrafikverketWindow", () => {
+  it("keeps concurrent database writes below hosted session-pool limits", async () => {
+    let activeWrites = 0;
+    let peakWrites = 0;
+    const records = PILOT_STATIONS.map((station, index) => ({
+      id: `station-${index}`,
+      ...station,
+    }));
+    const database = {
+      station: {
+        upsert: vi.fn(async () => {
+          activeWrites += 1;
+          peakWrites = Math.max(peakWrites, activeWrites);
+          await new Promise((resolve) => setTimeout(resolve, 2));
+          activeWrites -= 1;
+        }),
+        findMany: vi.fn(async () => records),
+      },
+    } as unknown as PrismaClient;
+    const provider = {
+      getAnnouncementsForStations: vi.fn(async () => []),
+    } as unknown as TrafikverketRailDataProvider;
+
+    await collectTrafikverketWindow(
+      {
+        startTime: new Date("2026-08-10T04:00:00Z"),
+        endTime: new Date("2026-08-10T05:00:00Z"),
+      },
+      { database, provider },
+    );
+
+    expect(database.station.upsert).toHaveBeenCalledTimes(PILOT_STATIONS.length);
+    expect(peakWrites).toBeLessThanOrEqual(4);
   });
 });
