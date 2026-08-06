@@ -1,0 +1,118 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Station {
+  id                  String             @id @default(cuid())
+  externalId          String             @unique
+  name                String
+  municipality        String
+  latitude            Float
+  longitude           Float
+  originJourneys      ScheduledJourney[] @relation("JourneyOrigin")
+  destinationJourneys ScheduledJourney[] @relation("JourneyDestination")
+  originCommutes      SavedCommute[]     @relation("CommuteOrigin")
+  destinationCommutes SavedCommute[]     @relation("CommuteDestination")
+
+  @@index([name])
+}
+
+model SavedCommute {
+  id                   String                   @id @default(cuid())
+  userId               String?
+  anonymousSessionId   String?
+  originStationId      String
+  destinationStationId String
+  requiredArrivalTime  DateTime                 @db.Time(0)
+  weekdays             Int[]
+  targetReliability    Float                    @default(0.9)
+  createdAt            DateTime                 @default(now()) @db.Timestamptz(3)
+  updatedAt            DateTime                 @updatedAt @db.Timestamptz(3)
+  originStation        Station                  @relation("CommuteOrigin", fields: [originStationId], references: [id])
+  destinationStation   Station                  @relation("CommuteDestination", fields: [destinationStationId], references: [id])
+  calculations         ReliabilityCalculation[]
+
+  @@index([anonymousSessionId])
+  @@index([userId])
+}
+
+model ScheduledJourney {
+  id                   String   @id @default(cuid())
+  externalJourneyId    String
+  serviceDate          DateTime @db.Date
+  originStationId      String
+  destinationStationId String
+  scheduledDeparture   DateTime @db.Timestamptz(3)
+  scheduledArrival     DateTime @db.Timestamptz(3)
+  transferCount        Int      @default(0)
+  routeDescription     String
+  operatorName         String?
+  serviceCategory      String   @default("local")
+  scheduleSource       String   @default("mock")
+  originStation        Station  @relation("JourneyOrigin", fields: [originStationId], references: [id])
+  destinationStation   Station  @relation("JourneyDestination", fields: [destinationStationId], references: [id])
+
+  @@unique([externalJourneyId, serviceDate])
+  @@index([originStationId, destinationStationId, serviceDate])
+}
+
+model HistoricalJourneyOutcome {
+  id                 String    @id @default(cuid())
+  externalJourneyId  String
+  serviceDate        DateTime  @db.Date
+  scheduledDeparture DateTime  @db.Timestamptz(3)
+  scheduledArrival   DateTime  @db.Timestamptz(3)
+  actualDeparture    DateTime? @db.Timestamptz(3)
+  actualArrival      DateTime? @db.Timestamptz(3)
+  cancelled          Boolean   @default(false)
+  transferMissed     Boolean?
+  source             String
+  importedAt         DateTime  @default(now()) @db.Timestamptz(3)
+
+  @@unique([externalJourneyId, serviceDate])
+  @@index([externalJourneyId, serviceDate])
+}
+
+model TrainAnnouncementObservation {
+  id                         String    @id @default(cuid())
+  sourceId                   String    @unique
+  trainIdent                 String
+  scheduledDepartureDateTime DateTime? @db.Timestamptz(3)
+  activityType               String
+  locationSignature          String
+  advertisedTimeAtLocation   DateTime  @db.Timestamptz(3)
+  estimatedTimeAtLocation    DateTime? @db.Timestamptz(3)
+  actualTimeAtLocation       DateTime? @db.Timestamptz(3)
+  cancelled                  Boolean   @default(false)
+  operatorName               String?
+  productDescription         String?
+  deviations                 String[]
+  sourceModifiedAt           DateTime? @db.Timestamptz(3)
+  firstSeenAt                DateTime  @default(now()) @db.Timestamptz(3)
+  lastSeenAt                 DateTime  @updatedAt @db.Timestamptz(3)
+
+  @@index([trainIdent, scheduledDepartureDateTime])
+  @@index([locationSignature, advertisedTimeAtLocation])
+  @@index([advertisedTimeAtLocation])
+}
+
+model ReliabilityCalculation {
+  id                   String        @id @default(cuid())
+  savedCommuteId       String?
+  calculatedAt         DateTime      @default(now()) @db.Timestamptz(3)
+  recommendedJourneyId String
+  probability          Float
+  confidence           String
+  sampleSize           Int
+  explanation          String
+  reasonCodes          String[]
+  algorithmVersion     String        @default("empirical-v1")
+  savedCommute         SavedCommute? @relation(fields: [savedCommuteId], references: [id], onDelete: SetNull)
+
+  @@index([savedCommuteId, calculatedAt])
+}

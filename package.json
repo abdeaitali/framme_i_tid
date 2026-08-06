@@ -1,0 +1,47 @@
+{
+  "name": "framme-i-tid",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build --webpack",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "db:migrate": "prisma migrate deploy",
+    "db:migrate:dev": "prisma migrate dev",
+    "db:seed": "prisma db seed",
+    "db:studio": "prisma studio",
+    "trains:collect": "tsx scripts/collect-trafikverket.ts",
+    "trains:sync-schedule": "tsx scripts/collect-trafikverket.ts --hours-back=0 --hours-ahead=192 --chunk-hours=24"
+  },
+  "dependencies": {
+    "@prisma/client": "6.19.3",
+    "date-fns": "4.1.0",
+    "date-fns-tz": "3.2.0",
+    "next": "16.3.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "@testing-library/jest-dom": "6.9.1",
+    "@types/node": "24.10.0",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2",
+    "autoprefixer": "10.4.21",
+    "dotenv": "16.6.1",
+    "eslint": "9.39.1",
+    "eslint-config-next": "16.3.0",
+    "postcss": "8.5.26",
+    "prisma": "6.19.3",
+    "tailwindcss": "3.4.18",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3",
+    "vitest": "3.2.7"
+  }
+}
