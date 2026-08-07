@@ -99,6 +99,8 @@ npm run db:studio        # inspect data with Prisma Studio
 
 The development-only endpoint `POST /api/import/mock` runs the same idempotent mock import. It is disabled when `NODE_ENV=production`.
 
+For Supabase deployments, the committed hardening migration enables Row Level Security on every application table (including Prisma's migration table) and revokes access from the Data API roles. No client policies are created because this MVP accesses PostgreSQL only through server-side Prisma; the `postgres` connection used by the application, migrations, and collector remains available.
+
 ## Environment variables
 
 | Variable | Required | Purpose |
@@ -333,6 +335,7 @@ No page or algorithm change is required for a new configured corridor.
 ├── prisma/
 │   ├── migrations/202608060001_init/migration.sql
 │   ├── migrations/202608060003_train_announcement_collection/migration.sql
+│   ├── migrations/202608070001_harden_public_schema/migration.sql
 │   ├── mock-data.ts
 │   ├── schema.prisma
 │   └── seed.ts
