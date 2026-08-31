@@ -18,4 +18,10 @@ test("searches for a reliable departure and saves the commute", async ({ page })
   await expect(page).toHaveURL(/\/pendling\?saved=1/);
   await expect(page.getByRole("heading", { name: "Veckan i ett ögonkast" })).toBeVisible();
   await expect(page.getByText("Pendlingen är sparad på den här enheten.")).toBeVisible();
+
+  await page.getByRole("button", { name: "Ta bort sparad pendling" }).click();
+  await page.getByRole("button", { name: "Ja, ta bort" }).click();
+  await expect(page).toHaveURL(/\/pendling\?deleted=1/);
+  await expect(page.getByText("Den sparade pendlingen har tagits bort.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Ingen sparad pendling ännu" })).toBeVisible();
 });

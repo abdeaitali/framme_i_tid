@@ -29,6 +29,7 @@ export function CommuteEditor({ stations, initial }: CommuteEditorProps) {
   const router = useRouter();
   const [values, setValues] = useState(initial);
   const [state, setState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [deleteState, setDeleteState] = useState<"idle" | "confirming" | "deleting" | "error">("idle");
 
   function toggleWeekday(day: number): void {
     setValues((current) => ({
@@ -53,6 +54,18 @@ export function CommuteEditor({ stations, initial }: CommuteEditorProps) {
       router.refresh();
     } catch {
       setState("error");
+    }
+  }
+
+  async function deleteCommute(): Promise<void> {
+    setDeleteState("deleting");
+    try {
+      const response = await fetch("/api/commute", { method: "DELETE" });
+      if (!response.ok) throw new Error("delete_failed");
+      router.push("/pendling?deleted=1");
+      router.refresh();
+    } catch {
+      setDeleteState("error");
     }
   }
 
@@ -130,6 +143,44 @@ export function CommuteEditor({ stations, initial }: CommuteEditorProps) {
         </button>
         {state === "saved" ? <p role="status" className="text-sm font-bold text-pine">Sparat.</p> : null}
         {state === "error" ? <p role="alert" className="text-sm font-bold text-red-700">Kunde inte spara.</p> : null}
+      </div>
+      <div className="mt-8 border-t border-ink/10 pt-6">
+        <h3 className="font-black">Ta bort sparad pendling</h3>
+        <p className="mt-2 max-w-xl text-sm leading-6 text-ink/65">
+          Pendlingen och kopplingen till den här webbläsaren tas bort permanent.
+        </p>
+        {deleteState === "confirming" ? (
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              className="button-secondary border-red-200 text-red-700 hover:bg-red-50"
+              onClick={deleteCommute}
+            >
+              Ja, ta bort
+            </button>
+            <button
+              type="button"
+              className="button-secondary"
+              onClick={() => setDeleteState("idle")}
+            >
+              Avbryt
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            className="button-secondary mt-4 border-red-200 text-red-700 hover:bg-red-50"
+            onClick={() => setDeleteState("confirming")}
+            disabled={deleteState === "deleting"}
+          >
+            {deleteState === "deleting" ? "Tar bort…" : "Ta bort sparad pendling"}
+          </button>
+        )}
+        {deleteState === "error" ? (
+          <p role="alert" className="mt-3 text-sm font-bold text-red-700">
+            Pendlingen kunde inte tas bort. Försök igen.
+          </p>
+        ) : null}
       </div>
     </form>
   );

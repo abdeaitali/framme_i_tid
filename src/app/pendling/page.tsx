@@ -10,9 +10,14 @@ import { getTransportDataProvider } from "@/providers";
 export const metadata: Metadata = { title: "Min pendling" };
 export const dynamic = "force-dynamic";
 
-function EmptyCommute() {
+function EmptyCommute({ deleted = false }: { deleted?: boolean }) {
   return (
     <div className="card mx-auto max-w-2xl p-8 text-center sm:p-12">
+      {deleted ? (
+        <p role="status" className="mb-6 rounded-2xl bg-mint px-5 py-4 font-bold text-pine">
+          Den sparade pendlingen har tagits bort.
+        </p>
+      ) : null}
       <span className="mx-auto grid size-14 place-items-center rounded-full bg-mint text-2xl" aria-hidden="true">↗</span>
       <h1 className="mt-5 text-3xl font-black">Ingen sparad pendling ännu</h1>
       <p className="mx-auto mt-3 max-w-md leading-7 text-ink/65">Sök efter en resa och spara rekommendationen. Då får du en ny riskbedömning för varje vald veckodag.</p>
@@ -45,7 +50,7 @@ export default async function CommutePage({
   const cookieStore = await cookies();
   const sessionId = cookieStore.get("framme_session")?.value;
   if (!sessionId) {
-    return <section className="page-shell py-20"><EmptyCommute /></section>;
+    return <section className="page-shell py-20"><EmptyCommute deleted={params.deleted === "1"} /></section>;
   }
 
   const loaded = await loadCommuteData(sessionId);
@@ -54,7 +59,7 @@ export default async function CommutePage({
       <section className="page-shell py-20">
         <div className="card mx-auto max-w-2xl p-10 text-center">
           <h1 className="text-3xl font-black">Veckan kunde inte laddas</h1>
-          <p className="mt-3 text-ink/65">Kontrollera att databasen är startad och att mockdata har importerats.</p>
+          <p className="mt-3 text-ink/65">Försök igen om en stund.</p>
           <Link href="/" className="button-primary mt-7">Till startsidan</Link>
         </div>
       </section>
