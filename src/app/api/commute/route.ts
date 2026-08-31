@@ -64,3 +64,17 @@ export async function POST(request: NextRequest): Promise<Response> {
     return errorResponse(error);
   }
 }
+
+export async function DELETE(request: NextRequest): Promise<Response> {
+  try {
+    const sessionId = request.cookies.get(SESSION_COOKIE)?.value;
+    const result = sessionId
+      ? await prisma.savedCommute.deleteMany({ where: { anonymousSessionId: sessionId } })
+      : { count: 0 };
+    const response = NextResponse.json({ data: { deleted: result.count > 0 } });
+    response.cookies.delete({ name: SESSION_COOKIE, path: "/" });
+    return response;
+  } catch (error) {
+    return errorResponse(error);
+  }
+}

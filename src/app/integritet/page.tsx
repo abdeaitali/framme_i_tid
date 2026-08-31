@@ -6,7 +6,7 @@ export default function PrivacyPage() {
   return (
     <article className="page-shell py-14 sm:py-20">
       <div className="mx-auto max-w-3xl">
-        <p className="text-sm font-black uppercase tracking-[0.16em] text-pine">Integritet i MVP:t</p>
+        <p className="text-sm font-black uppercase tracking-[0.16em] text-pine">Integritet i pilottjänsten</p>
         <h1 className="mt-3 text-4xl font-black tracking-tight sm:text-5xl">Så lite persondata som möjligt</h1>
         <p className="mt-5 text-lg leading-8 text-ink/70">Du ska kunna få en användbar rekommendation utan konto, hemadress eller positionshistorik.</p>
 
@@ -21,11 +21,19 @@ export default function PrivacyPage() {
           </section>
           <section>
             <h2 className="text-2xl font-black text-ink">Uppskattningar och datakällor</h2>
-            <p className="mt-3">Resultaten är sannolikhetsuppskattningar och inga garantier. Gränssnittet märker tydligt ut syntetisk demonstrationsdata och om en resa bygger på Trafiklab eller Trafikverket. Båda realdatalägena kräver separata servernycklar och konfiguration.</p>
+            <p className="mt-3">Resultaten är sannolikhetsuppskattningar och inga garantier. Tågannonseringar från Trafikverket sparas för att bygga statistik om faktiska ankomster, förseningar och inställda avgångar. Gränssnittet visar vilken datakälla som stöder resultatet.</p>
           </section>
           <section>
-            <h2 className="text-2xl font-black text-ink">Lagring och radering</h2>
-            <p className="mt-3">I pilotversionen ligger data i den lokala PostgreSQL-databasen. Radera webbläsarens cookie och motsvarande SavedCommute-post för att ta bort kopplingen. En publik tjänst behöver komplettera detta med tydlig personuppgiftsansvarig, gallringstid och kontaktväg.</p>
+            <h2 className="text-2xl font-black text-ink">Lagring och tjänsteleverantörer</h2>
+            <p className="mt-3">Webbtjänsten körs hos Vercel och databasen är en PostgreSQL-databas hos Supabase. API-nycklar används endast på serversidan. Vi säljer inte uppgifter om sparade pendlingar.</p>
+          </section>
+          <section>
+            <h2 className="text-2xl font-black text-ink">Radera en sparad pendling</h2>
+            <p className="mt-3">Du kan när som helst gå till Min pendling och välja Ta bort sparad pendling. Då raderas både databasposten och sessionskakan som kopplar den till webbläsaren.</p>
+          </section>
+          <section>
+            <h2 className="text-2xl font-black text-ink">Före konto eller betalning</h2>
+            <p className="mt-3">Innan tjänsten inför konton, betalning eller valfri analys kompletteras informationen med personuppgiftsansvarig, kontaktväg, rättslig grund och tydliga gallringstider.</p>
           </section>
         </div>
       </div>

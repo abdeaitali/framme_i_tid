@@ -7,6 +7,7 @@ import type { Station } from "@/domain/transport";
 interface JourneySearchFormProps {
   stations: Station[];
   defaultDate: string;
+  defaultArrivalTime: string;
   initial?: {
     originStationId?: string;
     destinationStationId?: string;
@@ -15,17 +16,21 @@ interface JourneySearchFormProps {
   };
 }
 
-export function JourneySearchForm({ stations, defaultDate, initial }: JourneySearchFormProps) {
+export function JourneySearchForm({
+  stations,
+  defaultDate,
+  defaultArrivalTime,
+  initial,
+}: JourneySearchFormProps) {
   const router = useRouter();
-  const linkoping = stations.find((station) => station.externalId === "SE_STA_LKP")?.id ?? "";
   const stockholm = stations.find((station) => station.externalId === "SE_STA_STO")?.id ?? "";
-  const [originStationId, setOriginStationId] = useState(initial?.originStationId ?? linkoping);
+  const [originStationId, setOriginStationId] = useState(initial?.originStationId ?? stockholm);
   const [destinationStationId, setDestinationStationId] = useState(
-    initial?.destinationStationId ?? stockholm,
+    initial?.destinationStationId ?? "",
   );
   const [travelDate, setTravelDate] = useState(defaultDate);
   const [requiredArrivalTime, setRequiredArrivalTime] = useState(
-    initial?.requiredArrivalTime ?? "08:30",
+    initial?.requiredArrivalTime ?? defaultArrivalTime,
   );
   const [targetReliability, setTargetReliability] = useState(
     String(initial?.targetReliability ?? 0.9),

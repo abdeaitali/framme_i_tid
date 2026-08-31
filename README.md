@@ -208,6 +208,20 @@ npm test
 npm run build
 ```
 
+## Safe release workflow
+
+Treat GitHub as the source of truth and release through a pull request:
+
+1. Create a short-lived feature branch and make the change locally.
+2. Run `npm run lint`, `npm run typecheck`, `npm test`, and `npm run build`.
+3. Push the branch and test the Vercel Preview deployment.
+4. Merge into `main` only after the `Validate application` check and the preview both pass.
+5. Confirm the production deployment on the public domain after Vercel promotes `main`.
+
+Code-only changes do not require a Supabase update. Environment variables must be updated separately in Vercel and, when used by the collector, in GitHub Actions secrets. A Vercel redeploy is required after an environment-variable change.
+
+Database changes must be created as committed Prisma migrations and tested before release. Use backward-compatible expand-and-contract migrations so the existing application continues to work while `npm run db:migrate` is applied. Do not make production schema changes directly in the Supabase dashboard, and do not rely on the scheduled collector as the release gate for an application change that requires a new schema.
+
 The unit suite covers all-arrive-on-time, mixed delays, cancellations, low samples, missing/invalid data, transfers, no option reaching the target, tied probabilities, realtime disruption, and a deadline crossing midnight. It also tests Zod validation and the mock provider without PostgreSQL.
 
 Run the browser flow after the database is migrated and seeded:

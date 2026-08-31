@@ -1,3 +1,4 @@
+import { addHours } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
 import { JourneySearchForm } from "@/components/journey-search-form";
 import { DataModeBadge } from "@/components/data-mode-badge";
@@ -10,7 +11,9 @@ export const dynamic = "force-dynamic";
 export default async function HomePage() {
   const stations = await getPilotStations();
   const dataMode = getTransportDataProvider().mode;
-  const defaultDate = formatInTimeZone(new Date(), STOCKHOLM_TIME_ZONE, "yyyy-MM-dd");
+  const defaultArrival = addHours(new Date(), 2);
+  const defaultDate = formatInTimeZone(defaultArrival, STOCKHOLM_TIME_ZONE, "yyyy-MM-dd");
+  const defaultArrivalTime = formatInTimeZone(defaultArrival, STOCKHOLM_TIME_ZONE, "HH:mm");
 
   return (
     <>
@@ -25,9 +28,9 @@ export default async function HomePage() {
             Ange när du måste vara framme. Vi rekommenderar avgången som ger dig bäst chans att hinna i tid.
           </p>
           <div className="mt-9 flex flex-wrap gap-x-7 gap-y-3 text-sm font-semibold text-ink/70">
-            <span>✓ 12 veckors historik</span>
+            <span>✓ Upp till 12 veckors historik</span>
             <span>✓ Förklarad risk</span>
-            <span>✓ 18 anslutna stationer</span>
+            <span>✓ 18 stationer i piloten</span>
           </div>
         </div>
         <div className="card relative overflow-hidden p-5 sm:p-8">
@@ -36,7 +39,11 @@ export default async function HomePage() {
             <p className="text-sm font-bold text-pine">När måste du vara framme?</p>
             <h2 className="mt-1 text-2xl font-black tracking-tight">Planera för verkligheten</h2>
             <div className="mt-7">
-              <JourneySearchForm stations={stations} defaultDate={defaultDate} />
+              <JourneySearchForm
+                stations={stations}
+                defaultDate={defaultDate}
+                defaultArrivalTime={defaultArrivalTime}
+              />
             </div>
           </div>
         </div>
